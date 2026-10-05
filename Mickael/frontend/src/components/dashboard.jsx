@@ -31,6 +31,73 @@ function Dashboard() {
   const [active, setActive] = useState(null);
   const [alert, setAlert] = useState(false);
 
+  const attackTypes = [
+    {
+      name: "Brute Force",
+      percentage: 47.4,
+      color: "#ff3b4b",
+    },
+    {
+      name: "SQL Injection",
+      percentage: 21.1,
+      color: "#ffc107",
+    },
+    {
+      name: "XSS",
+      percentage: 13.2,
+      color: "#1683ff",
+    },
+    {
+      name: "Scan de ports",
+      percentage: 10.5,
+      color: "#8b4de8",
+    },
+    {
+      name: "Autres",
+      percentage: 7.9,
+      color: "#8ba9c5",
+    },
+  ];
+  const logs = [
+  {
+    id: 1,
+    type: "INFO",
+    message: "Serveur connecté",
+    time: "14:28:12",
+    date: "08/04/2026",
+    source: "Backend API",
+    ip: "192.168.1.45",
+    endpoint: "/api/server",
+    method: "GET",
+    description: "Le serveur backend est correctement connecté.",
+  },
+  {
+    id: 2,
+    type: "SUCCESS",
+    message: "Données récupérées",
+    time: "14:28:15",
+    date: "08/04/2026",
+    source: "Sensor API",
+    ip: "192.168.1.20",
+    endpoint: "/api/sensors",
+    method: "GET",
+    description: "Les données des capteurs ont été récupérées avec succès.",
+  },
+  {
+    id: 3,
+    type: "ERROR",
+    message: "Connexion échouée",
+    time: "14:29:03",
+    date: "08/04/2026",
+    source: "Authentication",
+    ip: "192.168.1.145",
+    endpoint: "/login",
+    method: "POST",
+    description:
+      "Plusieurs tentatives de connexion ont échoué depuis cette adresse IP.",
+  },
+];
+
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -46,7 +113,7 @@ function Dashboard() {
           onClick={() => setActive(active === "left" ? null : "left")}
         >
           <h3 className="capteur-title">Capteurs</h3>
-          
+
           <div className="flex-row">
             <div className="cap-console">
               <h2>25°C</h2>
@@ -107,14 +174,27 @@ function Dashboard() {
               {/* <source src="/assetssecurity.mp4" type="video/mp4" /> */}
             </video>
           </div>
-
         </div>
       </div>
 
       <div className="section2">
         <div className="actioneur">
           <h2>Type d'attaque</h2>
-          
+
+          <div className="attack-types">
+            {attackTypes.map((attack) => (
+              <div className="attack-row" key={attack.name}>
+                <span
+                  className="attack-square"
+                  style={{ backgroundColor: attack.color }}
+                />
+
+                <span className="attack-name">{attack.name}</span>
+
+                <span className="attack-percentage">{attack.percentage}%</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="journal">
@@ -140,7 +220,6 @@ function Dashboard() {
             {alert ? "⚠ ALERT ACTIVE" : "SYSTEM NORMAL"}
           </p>
         </div>
-
       </div>
     </div>
   );

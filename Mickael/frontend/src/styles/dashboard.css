@@ -95,6 +95,7 @@
   font-family: monospace;
   font-size: 14px;
   line-height: 1.6;
+  height: 100%;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
@@ -110,12 +111,10 @@
   background-color: #253c64;
 }
 
-/* Conteneur sélectionné */
 .panel.expanded {
   flex-basis: 60%;
 }
 
-/* Autre conteneur */
 .panel.collapsed {
   flex-basis: 40%;
 }
@@ -124,10 +123,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: auto 0;
+  height: 100%;
   gap: 15px;
 }
 
-/* Voyant */
 .warning-light {
   width: 22px;
   height: 22px;
@@ -181,4 +181,38 @@
 .alert-on {
   color: #ef4444;
   font-family: monospace;
+}
+
+.attack-types {
+  width: 100%;
+  padding: 10px 0;
+  font-family: Arial, sans-serif;
+}
+
+.attack-row {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  gap: 14px;
+}
+
+.attack-square {
+  width: 17px;
+  height: 17px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.attack-name {
+  color: #d6e4f0;
+  font-size: 16px;
+  flex: 1;
+}
+
+.attack-percentage {
+  color: #d6e4f0;
+  font-size: 16px;
+  font-weight: 500;
+  min-width: 55px;
+  text-align: right;
 }
