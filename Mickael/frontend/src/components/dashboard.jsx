@@ -59,44 +59,58 @@ function Dashboard() {
     },
   ];
   const logs = [
-  {
-    id: 1,
-    type: "INFO",
-    message: "Serveur connecté",
-    time: "14:28:12",
-    date: "08/04/2026",
-    source: "Backend API",
-    ip: "192.168.1.45",
-    endpoint: "/api/server",
-    method: "GET",
-    description: "Le serveur backend est correctement connecté.",
-  },
-  {
-    id: 2,
-    type: "SUCCESS",
-    message: "Données récupérées",
-    time: "14:28:15",
-    date: "08/04/2026",
-    source: "Sensor API",
-    ip: "192.168.1.20",
-    endpoint: "/api/sensors",
-    method: "GET",
-    description: "Les données des capteurs ont été récupérées avec succès.",
-  },
-  {
-    id: 3,
-    type: "ERROR",
-    message: "Connexion échouée",
-    time: "14:29:03",
-    date: "08/04/2026",
-    source: "Authentication",
-    ip: "192.168.1.145",
-    endpoint: "/login",
-    method: "POST",
-    description:
-      "Plusieurs tentatives de connexion ont échoué depuis cette adresse IP.",
-  },
-];
+    {
+      id: 1,
+      type: "INFO",
+      message: "Niveau détecté : 21°C",
+      time: "14:28:12",
+      date: "08/04/2026",
+      source: "Backend API",
+      ip: "192.168.1.45",
+      endpoint: "/api/server",
+      method: "GET",
+      description: "Le serveur backend est correctement connecté.",
+    },
+    {
+      id: 2,
+      type: "SUCCESS",
+      message: "Données récupérées",
+      time: "14:28:15",
+      date: "08/04/2026",
+      source: "Sensor API",
+      ip: "192.168.1.20",
+      endpoint: "/api/sensors",
+      method: "GET",
+      description: "Les données des capteurs ont été récupérées avec succès.",
+    },
+    {
+      id: 3,
+      type: "ERROR",
+      message: "Connexion échouée",
+      time: "14:29:03",
+      date: "08/04/2026",
+      source: "Authentication",
+      ip: "192.168.1.145",
+      endpoint: "/login",
+      method: "POST",
+      description:
+        "Plusieurs tentatives de connexion ont échoué depuis cette adresse IP.",
+    },
+    {
+      id: 4,
+      type: "ERROR",
+      message: "Connexion échouée",
+      time: "14:29:03",
+      date: "08/04/2026",
+      source: "Authentication",
+      ip: "192.168.1.145",
+      endpoint: "/login",
+      method: "POST",
+      description:
+        "Plusieurs tentatives de connexion ont échoué depuis cette adresse IP.",
+    },
+  ];
+  const [selectedLog, setSelectedLog] = useState(null);
 
   return (
     <div className="dashboard">
@@ -198,12 +212,24 @@ function Dashboard() {
         </div>
 
         <div className="journal">
-          <h2>Journal</h2>
-          <div className="console">
-            <p>[INFO] Serveur connecté</p>
-            <p>[SUCCESS] Données récupérées</p>
-            <p>[ERROR] Connexion échouée</p>
+          <div className="logs-header">
+            <h2>Journal</h2>
+            <p>{logs.length} événements</p>
           </div>
+          <div className="console">
+            {logs.map((log) => (
+              <div
+                key={log.id}
+                className={`log-item log-${log.type.toLowerCase()}`}
+                onClick={() => setSelectedLog(log)}
+              >
+                <span className="log-type">[{log.type}]</span>
+                <span className="log-message">{log.message}</span>
+                <span className="log-time">{log.time}</span>
+              </div>
+            ))}
+          </div>
+
         </div>
 
         <div className="buzzer-container">
@@ -221,6 +247,86 @@ function Dashboard() {
           </p>
         </div>
       </div>
+
+      {/* MODAL */}
+      {selectedLog && (
+        <div className="modal-overlay" onClick={() => setSelectedLog(null)}>
+          <div className="log-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <h2>Détails de l'événement</h2>
+                <span>
+                  {selectedLog.date} {selectedLog.time}
+                </span>
+              </div>
+
+              <button
+                className="modal-close"
+                onClick={() => setSelectedLog(null)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="event-banner">
+              <div className={`event-icon ${selectedLog.type.toLowerCase()}`}>
+                {selectedLog.type === "ERROR" ? "!" : "✓"}
+              </div>
+
+              <div>
+                <h3>{selectedLog.message}</h3>
+                <span>{selectedLog.source}</span>
+              </div>
+
+              <strong>{selectedLog.type}</strong>
+            </div>
+
+            <div className="event-info">
+              <div>
+                <label>Adresse IP</label>
+                <strong>{selectedLog.ip}</strong>
+              </div>
+
+              <div>
+                <label>Date & heure</label>
+                <strong>
+                  {selectedLog.date} {selectedLog.time}
+                </strong>
+              </div>
+
+              <div>
+                <label>Endpoint</label>
+                <strong>{selectedLog.endpoint}</strong>
+              </div>
+
+              <div>
+                <label>Méthode</label>
+                <strong>{selectedLog.method}</strong>
+              </div>
+            </div>
+
+            <div className="analysis">
+              <h3>Analyse</h3>
+
+              <p>{selectedLog.description}</p>
+            </div>
+
+            {selectedLog.type === "ERROR" && (
+              <div className="action-warning">
+                <span>⚠</span>
+
+                <div>
+                  <strong>Action recommandée</strong>
+                  <p>
+                    Vérifier l'adresse IP et analyser les tentatives de
+                    connexion.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
