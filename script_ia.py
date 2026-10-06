@@ -1,10 +1,13 @@
 import cv2
 import mediapipe as mp
+import json
 
 cap = cv2.VideoCapture(0)
 mp_draw = mp.solutions.drawing_utils
 mp_face_detection = mp.solutions.face_detection
 
+fichier = open('nombre_personnes.json', 'w')
+data = {}
 
 with mp_face_detection.FaceDetection(
     min_detection_confidence = 0.7
@@ -25,10 +28,10 @@ with mp_face_detection.FaceDetection(
                 x, y, w, h = int(box.xmin * iw), int(box.ymin * ih), int(box.width * iw), int(box.height * ih)
                 cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,255),2)
 
-        if compte_visage == 1 :
-            print("une seule personne, on va dire oui")
-        else :
-            print("soit personne, soit trop de gens")
+        fichier.seek(0)
+        data['nombre_personne'] = compte_visage
+        json.dump(data, fichier)
+        fichier.truncate()
         
         if cv2.waitKey(1) & 0xFF == ord('a'):
             break
