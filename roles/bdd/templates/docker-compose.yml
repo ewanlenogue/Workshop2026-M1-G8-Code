@@ -1,0 +1,17 @@
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: dXxXE7Ki%S~WwkVf^k4p
+      MARIADB_DATABASE: Worckshop
+      MARIADB_USER: G8
+      MARIADB_PASSWORD: 9HWFsu`A4yHhKjM@XF`R
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+volumes:
+  mariadb_data:

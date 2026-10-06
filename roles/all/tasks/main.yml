@@ -1,0 +1,7 @@
+---
+- name: Install various basic tools
+  ansible.builtin.apt:
+    update_cache: yes
+    pkg:
+      - docker.io
+      - docker-compose

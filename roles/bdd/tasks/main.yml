@@ -1,0 +1,20 @@
+---
+- name: Create mariadb docker-compose folder
+  ansible.builtin.file:
+    path: /home/{{ ansible_user }}/mariadb
+    state: directory
+    owner: 0
+    group: 0
+    mode: "0755"
+
+- name: Copy compose file
+  ansible.builtin.copy:
+    src: roles/bdd/templates/docker-compose.yml
+    dest: /home/{{ ansible_user }}/mariadb/docker-compose.yml
+    owner: 0
+    group: 0
+    mode: "0644"
+
+- name: Start mariadb container
+  community.docker.docker_compose_v2:
+    project_src: mariadb
