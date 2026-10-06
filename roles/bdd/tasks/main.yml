@@ -19,5 +19,4 @@
   community.docker.docker_compose_v2:
     project_src: /home/{{ docker_user }}/mariadb
     state: present
-  become: true
   become_user: "{{ docker_user }}"
