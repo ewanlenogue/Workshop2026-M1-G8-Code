@@ -5,3 +5,23 @@
     pkg:
       - docker.io
       - docker-compose
+
+- name: S'assurer que le service Docker est démarré et activé au boot
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: S'assurer que le groupe docker existe
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Créer l'utilisateur G8 et l'ajouter au groupe docker
+  ansible.builtin.user:
+    name: {{ docker_user }}
+    shell: /bin/bash
+    create_home: yes
+    groups: docker
+    append: yes
+    state: present
