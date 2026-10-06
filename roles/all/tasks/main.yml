@@ -17,11 +17,8 @@
     name: docker
     state: present
 
-- name: Créer l'utilisateur G8 et l'ajouter au groupe docker
+- name: Add G8 to the docker group
   ansible.builtin.user:
-    name: "{{ docker_user }}"
-    shell: /bin/bash
-    create_home: yes
+    name: G8
     groups: docker
     append: yes
-    state: present
