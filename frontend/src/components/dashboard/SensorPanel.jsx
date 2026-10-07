@@ -34,7 +34,7 @@ function SensorPanel({ active, setActive, data }) {
       </div>
 
       <div className="diagram-ligne">
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
             <CartesianGrid stroke="#1f2937" strokeDasharray="3 3" />
 

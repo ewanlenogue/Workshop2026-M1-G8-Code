@@ -8,14 +8,7 @@ import Buzzer from "./dashboard/Buzzer.jsx";
 import LogModal from "./dashboard/LogModal.jsx";
 
 function Dashboard() {
-  // const [users, setMessage] = useState([]);
-
-  // useEffect(() => {
-  //   fetch("http://localhost:3000/api/users")
-  //     .then((res) => res.json())
-  //     .then((data) => setMessage(data)) // Assuming you want to display all users
-  //     .catch((error) => console.error(error));
-  // }, []);
+  
   const data = [
     { day: "Lun", score: 20 },
     { day: "Mar", score: 35 },
