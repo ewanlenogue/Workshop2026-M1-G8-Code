@@ -5,16 +5,16 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const usersRoutes = require('./routes/usersRoutes');
+const indexRoutes = require('./routes/index');
 
 // Middleware to parse JSON requests
 app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/users', usersRoutes);
+app.use('/api', indexRoutes);
 
-// Sample route
+// Sample route 
 app.get('/', (req, res) => {
   res.send('Hello !');
 });
