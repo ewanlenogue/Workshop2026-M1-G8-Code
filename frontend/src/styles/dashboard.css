@@ -342,6 +342,10 @@
     flex-direction: column;
     flex: 1 1 0;
     gap: 10px;
+
+    /* hauteur bornée : le contenu déborde dans la barre de défilement,
+       et le panneau reste aligné avec le panneau « Événements » */
+    max-height: 560px;
 }
 
 .actioneur {
@@ -355,20 +359,46 @@
    ========================================================= */
 
 .console {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
     background: #111;
     color: #00ff66;
-    padding: 20px;
+    padding: 15px;
     border-radius: 8px;
     font-family: monospace;
     font-size: 14px;
     line-height: 1.6;
-    height: 100%;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     box-sizing: border-box;
 
-    /* évite que les longues lignes cassent le layout */
-    overflow-x: auto;
+    /* le journal défile verticalement dans son panneau */
+    flex: 1 1 auto;
+    min-height: 120px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
     overflow-wrap: break-word;
+}
+
+/* barre de défilement du journal (toujours visible) */
+.console::-webkit-scrollbar {
+    width: 9px;
+}
+
+.console::-webkit-scrollbar-track {
+    background: #0a1728;
+    border-radius: 5px;
+}
+
+.console::-webkit-scrollbar-thumb {
+    background: #1683ff;
+    border-radius: 5px;
+    border: 2px solid #0a1728;
+}
+
+.console::-webkit-scrollbar-thumb:hover {
+    background: #3ea0ff;
 }
 
 .console p {
@@ -527,8 +557,47 @@
 }
 
 /* =========================================================
-   TYPES D'ATTAQUES
+   ÉVÉNEMENTS — diagramme circulaire + détail
    ========================================================= */
+
+.events-pie {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    height: 210px;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+}
+
+.pie-center {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.pie-center strong {
+    color: #d6e4f0;
+    font-family: monospace;
+    font-size: 30px;
+    line-height: 1;
+}
+
+.pie-center span {
+    margin-top: 4px;
+    color: #718096;
+    font-family: monospace;
+    font-size: 11px;
+}
 
 .attack-types {
     width: 100%;
@@ -602,12 +671,16 @@
     align-items: center;
     gap: 12px;
     cursor: pointer;
+    padding: 5px 8px;
+    border: 1px solid transparent;
+    border-radius: 6px;
     transition:
         background 0.2s ease,
         border-color 0.2s ease,
         transform 0.2s ease;
 
     min-width: 0;
+    box-sizing: border-box;
 }
 
 .log-item:hover {
@@ -1104,6 +1177,10 @@
 
     .cap-console {
         padding: 14px 10px;
+    }
+
+    .events-pie {
+        height: 175px;
     }
 
     .diagram-ligne {
