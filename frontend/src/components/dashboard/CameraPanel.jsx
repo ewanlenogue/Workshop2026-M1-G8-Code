@@ -1,4 +1,4 @@
-import { CAMERA_STREAM_URL } from "../../api";
+import { CAMERA_STREAM_URL } from "../../services/api";
 
 function CameraPanel({ active, setActive }) {
   return (

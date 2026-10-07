@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "../styles/dashboard.css";
-import { getDashboardData, sendCommand } from "../api";
-import { buildJournal, buildStats, buildSerie, formatUptime } from "../events";
+import { getDashboardData, sendCommand } from "../services/api.js";
+import { buildJournal, buildStats, buildSerie, formatUptime } from "../services/events.js";
 import SensorPanel from "./dashboard/SensorPanel.jsx";
 import CameraPanel from "./dashboard/CameraPanel.jsx";
 import EventTypes from "./dashboard/EventTypes.jsx";

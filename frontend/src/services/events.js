@@ -1,11 +1,3 @@
-/*
-  Transformation des réponses de l'API en données d'affichage
-  (journal, répartition des événements, série du graphique).
-
-  Aucune valeur n'est inventée : tout provient des tables
-  telemetry, movements et fingerprint_events.
-*/
-
 export const API_SOURCES = {
   telemetry: { label: "Télémétrie", endpoint: "/api/v1/telemetrie" },
   movement: { label: "Capteur PIR", endpoint: "/api/v1/mouvement" },
@@ -35,8 +27,6 @@ export const formatUptime = (seconds) => {
   if (hours > 0) return `${hours} h ${minutes} min`;
   return `${minutes} min`;
 };
-
-/* ------------------------- Journal des événements ------------------------- */
 
 const buildTelemetryEvent = (row) => {
   const temperature = number(row.temperature);
@@ -132,8 +122,6 @@ export const buildJournal = ({ telemetry = [], movements = [], fingerprints = []
       endpoint: API_SOURCES[event.kind].endpoint,
     }));
 
-/* ---------------------- Répartition des événements ---------------------- */
-
 export const buildStats = ({
   telemetry = [],
   movements = [],
@@ -163,8 +151,6 @@ export const buildStats = ({
     })),
   };
 };
-
-/* --------------------------- Série du graphique --------------------------- */
 
 export const buildSerie = (telemetry = []) =>
   [...telemetry]

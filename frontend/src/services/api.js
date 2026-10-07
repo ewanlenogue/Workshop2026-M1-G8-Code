@@ -1,23 +1,10 @@
-/*
-  Accès à l'API Sentinel-X.
-
-  Toutes les valeurs affichées par le dashboard proviennent d'ici :
-  aucune donnée n'est écrite en dur dans les composants.
-
-  Configuration (fichier frontend/.env) :
-    VITE_API_URL            base de l'API backend      (défaut http://localhost:3000/api)
-    VITE_CAMERA_URL         URL du flux vidéo MJPEG/HLS de la caméra (vide = pas de flux)
-    VITE_COMMANDS_API_URL   API matérielle qui reçoit les ordres (buzzer, porte)
-*/
-
 const API_BASE = (
   import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 ).replace(/\/$/, "");
 
 const CAMERA_STREAM_URL = import.meta.env.VITE_CAMERA_URL || "";
 
-const COMMANDS_API_URL =
-  import.meta.env.VITE_COMMANDS_API_URL || `${API_BASE}/v1/commandes`;
+const COMMANDS_API_URL = import.meta.env.VITE_COMMANDS_API_URL || `${API_BASE}/v1/commandes`;
 
 async function request(path, options = {}) {
   let response;
@@ -38,8 +25,6 @@ async function request(path, options = {}) {
   return response.json();
 }
 
-/* ------------------------------ Lectures ------------------------------ */
-
 export const getTelemetry = (limit = 48) =>
   request(`/v1/telemetrie?limit=${limit}`);
 
@@ -59,13 +44,6 @@ export const getDashboardData = async (limits = {}) => {
   return { telemetry, movements, fingerprints };
 };
 
-/* ------------------------------ Ordres ------------------------------- */
-
-/*
-  Envoie une action à l'API matérielle (buzzer / porte).
-  Le backend Sentinel-X ne gère pas encore ces commandes :
-  l'URL se règle avec VITE_COMMANDS_API_URL.
-*/
 export const sendCommand = async (action) => {
   let response;
 
