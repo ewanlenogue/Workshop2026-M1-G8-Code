@@ -49,6 +49,39 @@ const createFingerprintEvent = async (req, res) => {
   }
 };
 
+const getFingerprintEvents = async (req, res) => {
+  const { device_id, limit } = req.query;
+  const parsedLimit = limit === undefined ? 100 : Number(limit);
+  const validDevice =
+    device_id === undefined ||
+    (typeof device_id === "string" && device_id.trim().length > 0);
+  const validLimit =
+    Number.isInteger(parsedLimit) && parsedLimit >= 1 && parsedLimit <= 1000;
+
+  if (!validDevice || !validLimit) {
+    return res.status(400).json({
+      message:
+        "Les paramètres device_id et limit doivent respecter les formats attendus"
+    });
+  }
+
+  try {
+    const events = await FingerprintEvent.findAll({
+      device_id: device_id?.trim(),
+      limit: parsedLimit
+    });
+
+    return res.json(events);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Erreur lors de la récupération des empreintes"
+    });
+  }
+};
+
 module.exports = {
-  createFingerprintEvent
+  createFingerprintEvent,
+  getFingerprintEvents
 };

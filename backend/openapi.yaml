@@ -41,6 +41,25 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/ServerError'
+    get:
+      tags: [Telemetrie]
+      summary: Recuperer la telemetrie
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Liste des mesures de telemetrie
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Telemetry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/v1/mouvement:
     post:
       tags: [Mouvement]
@@ -113,6 +132,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FingerprintResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags: [Empreinte]
+      summary: Recuperer les lectures d'empreintes
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Liste des lectures d'empreintes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FingerprintEvent'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
@@ -192,6 +230,17 @@ components:
         uptime_s:
           type: integer
           minimum: 0
+    Telemetry:
+      allOf:
+        - $ref: '#/components/schemas/TelemetryRequest'
+        - type: object
+          required: [id, received_at]
+          properties:
+            id:
+              type: integer
+            received_at:
+              type: string
+              format: date-time
     MovementRequest:
       type: object
       required: [device_id, motion, timestamp]
@@ -235,6 +284,22 @@ components:
           type: string
         id:
           type: integer
+        intrus:
+          type: boolean
+    FingerprintEvent:
+      type: object
+      required: [id, device_id, fingerprint_id, received_at, intrus]
+      properties:
+        id:
+          type: integer
+        device_id:
+          type: string
+        fingerprint_id:
+          type: integer
+          nullable: true
+        received_at:
+          type: string
+          format: date-time
         intrus:
           type: boolean
     PersonCountRequest:
