@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS commands;
+DROP TABLE IF EXISTS fingerprints;
+DROP TABLE IF EXISTS sensors;
