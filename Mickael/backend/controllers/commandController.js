@@ -1,4 +1,4 @@
-const Actuator = require("../models/Command");
+const Command = require("../models/Command");
 
 const createCommand = async (req, res) => {
 
@@ -17,7 +17,7 @@ const createCommand = async (req, res) => {
       });
     }
 
-    const databaseId = await Actuator.create({
+    const databaseId = await Command.create({
       id,
       target,
       action,
@@ -44,13 +44,13 @@ const getCommands = async (req, res) => {
 
   try {
 
-    const commands = await Actuator.findAll();
+    const commands = await Command.findAll();
 
     res.json(commands);
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Erreur lors de la récupération des commandes:", error);
 
     res.status(500).json({
       message: "Erreur serveur"
@@ -63,7 +63,9 @@ const getCommandById = async (req, res) => {
 
   try {
 
-    const command = await Actuator.findById(req.params.id);
+    const command = await Command.findById(req.params.id);
+
+    console.log("Commande trouvée:", command);
 
     if (!command) {
       return res.status(404).json({
@@ -71,7 +73,7 @@ const getCommandById = async (req, res) => {
       });
     }
 
-    res.json(actuator);
+    res.json(command);
 
   } catch (error) {
 

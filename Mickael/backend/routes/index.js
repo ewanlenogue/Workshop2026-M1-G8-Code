@@ -2,12 +2,12 @@ const express = require("express");
 
 const sensorRoutes = require("./sensorRoutes");
 const fingerprintRoutes = require("./fingerprintRoutes");
-const actuatorRoutes = require("./actuatorRoutes");
+const commandRoutes = require("./commandRoutes");
 
 const router = express.Router();
 
 router.use("/sensors", sensorRoutes);
 router.use("/fingerprints", fingerprintRoutes);
-router.use("/actuators", actuatorRoutes);
+router.use("/commands", commandRoutes);
 
 module.exports = router;
