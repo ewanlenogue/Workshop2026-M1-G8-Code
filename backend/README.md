@@ -85,6 +85,20 @@ La reponse `201` contient l'identifiant cree :
 
 Les donnees sont stockees dans `telemetry`.
 
+Pour lire les mesures :
+
+```http
+GET /api/v1/telemetrie
+```
+
+Filtres optionnels :
+
+```http
+GET /api/v1/telemetrie?device_id=tourelle-esp8266&limit=50
+```
+
+La limite est comprise entre `1` et `1000`, avec `100` par defaut.
+
 ### Enregistrer un mouvement
 
 ```http
@@ -142,6 +156,21 @@ L'identifiant est reconnu s'il existe dans `fingerprint_registry`. Sinon,
 la reponse contient `intrus: true`.
 
 Les lectures sont stockees dans `fingerprint_events`.
+
+Pour lire l'historique des empreintes :
+
+```http
+GET /api/v1/empreinte
+```
+
+Filtres optionnels :
+
+```http
+GET /api/v1/empreinte?device_id=tourelle-esp8266&limit=50
+```
+
+Chaque lecture contient aussi `intrus`, calcule a partir de
+`fingerprint_registry`.
 
 ### Retourner le nombre de personnes
 

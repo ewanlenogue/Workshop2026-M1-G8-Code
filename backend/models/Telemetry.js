@@ -28,6 +28,40 @@ const Telemetry = {
     );
 
     return result.insertId;
+  },
+
+  async findAll(filters = {}) {
+    const conditions = [];
+    const values = [];
+
+    if (filters.device_id) {
+      conditions.push("device_id = ?");
+      values.push(filters.device_id);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
+
+    const [rows] = await db.execute(
+      `SELECT
+        id,
+        device_id,
+        temperature,
+        humidity,
+        air_raw,
+        air_level,
+        rssi,
+        uptime_s,
+        received_at
+       FROM telemetry
+       ${whereClause}
+       ORDER BY received_at DESC
+       LIMIT ?`,
+      [...values, filters.limit || 100]
+    );
+
+    return rows;
   }
 };
 
