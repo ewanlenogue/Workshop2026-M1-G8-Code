@@ -76,7 +76,7 @@ function Dashboard() {
       <header className="dashboard-header">
         <div className="dashboard-title">
           <h1>SENTINEL X</h1>
-          <p>Centre de commandement</p>
+          <p>Centre de contrôle</p>
         </div>
 
         <div className={`dashboard-status ${error ? "offline" : "online"}`}>
