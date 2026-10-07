@@ -5,62 +5,139 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from "recharts";
 
-function SensorPanel({ active, setActive, data }) {
+const number = (value) => Number(value) || 0;
+
+const tooltipStyle = {
+  background: "#111827",
+  border: "1px solid #374151",
+  color: "#d6e4f0",
+  fontFamily: "monospace",
+};
+
+const UNITS = {
+  "Température": " °C",
+  "Humidité": " %",
+};
+
+function SensorPanel({ active, setActive, latest, serie }) {
+  const readings = latest
+    ? [
+        { value: `${number(latest.temperature).toFixed(1)} °C`, label: "Température" },
+        { value: `${number(latest.humidity).toFixed(1)} %`, label: "Humidité" },
+        { value: `${number(latest.air_raw)}`, label: `Air · ${latest.air_level}` },
+        { value: `${number(latest.rssi)} dBm`, label: "Wi-Fi RSSI" },
+      ]
+    : [];
+
   return (
     <div
       className={`panel dashboard-capteur
-            ${active === "left" ? "expanded" : ""} 
+            ${active === "left" ? "expanded" : ""}
             ${active === "right" ? "collapsed" : ""}`}
       onClick={() => setActive(active === "left" ? null : "left")}
     >
       <h3 className="capteur-title">Capteurs</h3>
 
-      <div className="flex-row">
-        <div className="cap-console">
-          <h2>25°C</h2>
-          Temp
+      {readings.length > 0 ? (
+        <div className="flex-row">
+          {readings.map((reading) => (
+            <div className="cap-console" key={reading.label}>
+              <h2>{reading.value}</h2>
+              {reading.label}
+            </div>
+          ))}
         </div>
-        <div className="cap-console">
-          <h2>60%</h2>
-          Humidité
-        </div>
-        <div className="cap-console">
-          <h2>1013 hPa</h2>
-          Pression
-        </div>
-      </div>
+      ) : (
+        <p className="empty-state">Aucune mesure reçue du boîtier.</p>
+      )}
 
-      <div className="diagram-ligne">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
-            <CartesianGrid stroke="#1f2937" strokeDasharray="3 3" />
+      {serie.length > 0 && (
+        <p className="chart-caption">
+          {serie.length} mesures — du {serie[0].fullLabel} au{" "}
+          {serie[serie.length - 1].fullLabel}
+        </p>
+      )}
 
-            <XAxis dataKey="day" stroke="#6b7280" />
+      <div className={`diagram-ligne ${serie.length === 0 ? "is-empty" : ""}`}>
+        {serie.length > 0 ? (
+          <>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={serie} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                <CartesianGrid stroke="#1f2937" strokeDasharray="3 3" />
 
-            <YAxis domain={[0, 100]} stroke="#6b7280" />
+                <XAxis
+                  dataKey="label"
+                  stroke="#6b7280"
+                  tick={{ fontSize: 11 }}
+                  minTickGap={28}
+                />
 
-            <Tooltip
-              contentStyle={{
-                background: "#111827",
-                border: "1px solid #374151",
-                color: "#00ff66",
-                fontFamily: "monospace",
-              }}
-            />
+                <YAxis
+                  yAxisId="left"
+                  domain={[0, 100]}
+                  stroke="#6b7280"
+                  tick={{ fontSize: 11 }}
+                />
 
-            <Line
-              type="monotone"
-              dataKey="score"
-              stroke="#00ff66"
-              strokeWidth={2}
-              dot={{ r: 3 }}
-              activeDot={{ r: 6 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  domain={[0, 1000]}
+                  stroke="#6b7280"
+                  tick={{ fontSize: 11 }}
+                />
+
+                <Tooltip
+                  labelFormatter={(label, payload) =>
+                    payload?.[0]?.payload.fullLabel ?? label
+                  }
+                  contentStyle={tooltipStyle}
+                  formatter={(value, name) => [`${value}${UNITS[name] ?? ""}`, name]}
+                />
+
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="temperature"
+                  name="Température"
+                  stroke="#00ff66"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                  activeDot={{ r: 6 }}
+                />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="humidity"
+                  name="Humidité"
+                  stroke="#38bdf8"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                  activeDot={{ r: 6 }}
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="air"
+                  name="Air brut"
+                  stroke="#ffc107"
+                  strokeWidth={2}
+                  strokeDasharray="5 4"
+                  dot={false}
+                  activeDot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </>
+        ) : (
+          <p className="empty-state">En attente de la première mesure…</p>
+        )}
       </div>
     </div>
   );

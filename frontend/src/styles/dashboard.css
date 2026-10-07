@@ -18,21 +18,116 @@
 .dashboard-header {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
-    gap: 4px 14px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
     width: 100%;
     min-width: 0;
 }
 
-.dashboard-header h1 {
+.dashboard-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.dashboard-title h1 {
     font-size: clamp(24px, 4.5vw, 34px);
     letter-spacing: 1px;
     overflow-wrap: anywhere;
 }
 
-.dashboard-header p {
+.dashboard-title p {
     color: #8ea6c9;
     font-size: clamp(13px, 2vw, 17px);
+}
+
+.dashboard-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 6px 14px;
+    border: 1px solid #1e3a5f;
+    border-radius: 999px;
+    background: #001f55;
+    color: #9fb3d1;
+    font-family: monospace;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-status .status-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+}
+
+.dashboard-status.offline .status-dot {
+    background: #ef4444;
+    box-shadow: 0 0 8px #ef4444;
+}
+
+/* =========================================================
+   BANNIÈRES API / ÉTATS VIDES
+   ========================================================= */
+
+.api-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    border: 1px solid;
+    border-radius: 10px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.api-banner.error {
+    background: #32151d;
+    border-color: #6b2633;
+    color: #fca5a5;
+}
+
+.api-banner.info {
+    background: #0b3150;
+    border-color: #1e3a5f;
+    color: #93c5fd;
+}
+
+.api-banner p {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.api-banner button {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    font-family: monospace;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.api-banner button:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.empty-state {
+    width: 100%;
+    padding: 12px 0;
+    color: #718096;
+    font-size: 14px;
+    text-align: center;
+    overflow-wrap: anywhere;
 }
 
 /* =========================================================
@@ -81,11 +176,16 @@
     width: 100%;
 }
 
+/*
+  Grille auto-adaptative : le nombre de cartes varie selon
+  les relevés renvoyés par l'API, les colonnes s'ajustent seules.
+*/
 .flex-row {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 8px;
+    width: 100%;
+    min-width: 0;
 }
 
 /* Console des capteurs */
@@ -103,18 +203,12 @@
     font-size: 14px;
     line-height: 0.7;
 
-    /*
-      Au lieu de width: 20%, on utilise flex.
-      Cela permet au contenu de s'adapter.
-      110px : les 3 valeurs tiennent sur une ligne
-      à partir de ~800px de large.
-    */
-    flex: 1 1 110px;
-    min-width: 100px;
+    /* item de grille : ne jamais dépasser sa colonne */
+    min-width: 0;
+    text-align: center;
 
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     box-sizing: border-box;
-    text-align: center;
 }
 
 .cap-console h2 {
@@ -127,10 +221,36 @@
    ========================================================= */
 
 .diagram-ligne {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     min-width: 0;
     height: 300px;
     overflow: hidden;
+}
+
+.diagram-ligne.is-empty {
+    height: auto;
+    min-height: 120px;
+    justify-content: center;
+    overflow: visible;
+}
+
+.chart-caption {
+    color: #718096;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+/* la légende ne doit jamais dépasser le graphique */
+.diagram-ligne .recharts-legend-wrapper {
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+.diagram-ligne .recharts-default-legend {
+    max-width: 100%;
+    line-height: 1.5;
 }
 
 /* =========================================================
@@ -165,6 +285,32 @@
     height: 100%;
     object-fit: cover;
     background: #050d1a;
+}
+
+.video-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 100%;
+    padding: 20px;
+    color: #718096;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.video-placeholder span {
+    font-size: 34px;
+}
+
+.video-placeholder code {
+    padding: 4px 8px;
+    border: 1px solid #1e3a5f;
+    border-radius: 6px;
+    background: #0a1728;
+    color: #38bdf8;
+    font-size: 12px;
 }
 
 /* =========================================================
@@ -265,9 +411,14 @@
     width: auto;
     flex: 0 1 auto;
     min-width: 0;
-    padding: 0 20px;
+    padding: 20px;
     text-align: center;
     box-sizing: border-box;
+
+    background-color: #001f55;
+    color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .warning-light {
@@ -326,6 +477,56 @@
 }
 
 /* =========================================================
+   PORTE + RETOUR DES COMMANDES
+   ========================================================= */
+
+.door-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: 2px solid #26384d;
+    border-radius: 10px;
+    background: #111c2b;
+    color: #38bdf8;
+    font-family: monospace;
+    font-size: 14px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.15s;
+    box-sizing: border-box;
+}
+
+.door-btn:hover:not(:disabled) {
+    border-color: #38bdf8;
+}
+
+.door-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.door-btn .door-icon {
+    font-size: 18px;
+}
+
+.command-status {
+    max-width: 100%;
+    color: #718096;
+    font-family: monospace;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.command-status.ok {
+    color: #22c55e;
+}
+
+.command-status.ko {
+    color: #ef4444;
+}
+
+/* =========================================================
    TYPES D'ATTAQUES
    ========================================================= */
 
@@ -356,6 +557,13 @@
     font-size: 16px;
     flex: 1;
     min-width: 0;
+}
+
+.attack-count {
+    display: block;
+    color: #718096;
+    font-family: monospace;
+    font-size: 12px;
 }
 
 .attack-percentage {
@@ -692,7 +900,6 @@
     }
 
     .cap-console {
-        flex: 1 1 110px;
         padding: 15px 8px;
     }
 
@@ -714,7 +921,7 @@
         width: 100%;
         height: auto;
         margin: 0;
-        padding: 10px 20px;
+        padding: 15px 20px;
     }
 
     .diagram-ligne {
@@ -764,8 +971,6 @@
     }
 
     .cap-console {
-        flex: 1 1 calc(50% - 8px);
-        min-width: 0;
         padding: 15px 10px;
         font-size: 12px;
     }
@@ -891,15 +1096,13 @@
     .dashboard-capteur,
     .dashboard-vision,
     .journal,
-    .actioneur {
+    .actioneur,
+    .buzzer-container {
         padding: 12px;
         border-radius: 6px;
     }
 
     .cap-console {
-        flex: 1 1 100%;
-        width: 100%;
-        min-width: 0;
         padding: 14px 10px;
     }
 

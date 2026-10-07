@@ -1,3 +1,5 @@
+import { CAMERA_STREAM_URL } from "../../api";
+
 function CameraPanel({ active, setActive }) {
   return (
     <div
@@ -9,10 +11,24 @@ function CameraPanel({ active, setActive }) {
       <div className="camera">
         <h3>CAMÉRA (VISION IA)</h3>
       </div>
+
       <div className="video">
-        <video className="security-video" autoPlay muted loop playsInline>
-          {/* <source src="/assetssecurity.mp4" type="video/mp4" /> */}
-        </video>
+        {CAMERA_STREAM_URL ? (
+          <video
+            className="security-video"
+            src={CAMERA_STREAM_URL}
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        ) : (
+          <div className="video-placeholder">
+            <span>🎥</span>
+            <p>Flux caméra non configuré</p>
+            <code>VITE_CAMERA_URL</code>
+          </div>
+        )}
       </div>
     </div>
   );
