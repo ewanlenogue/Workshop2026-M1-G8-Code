@@ -4,10 +4,10 @@ services:
     container_name: mariadb
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: dXxXE7Ki%S~WwkVf^k4p
-      MARIADB_DATABASE: Worckshop
-      MARIADB_USER: G8
-      MARIADB_PASSWORD: 9HWFsu`A4yHhKjM@XF`R
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
