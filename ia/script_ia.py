@@ -1,34 +1,18 @@
-"""
-Sentinel-X — module IA (caméra + détection de visages)
-
-Lancement :
-    cd ia
-    ./venv/bin/python script_ia.py
-
-Le script ouvre la webcam, détecte les visages (MediaPipe) et diffuse
-le résultat en direct vers le dashboard Sentinel-X :
-
-    http://localhost:8080/                  aperçu dans le navigateur
-    http://localhost:8080/stream.mjpg       flux MJPEG (panneau « CAMÉRA » du dashboard)
-    http://localhost:8080/nombre_personnes  personnes actuellement détectées
-
-Contrôle :
-    arret.json = {"arret": 1}  ->  caméra en marche
-    arret.json = {"arret": 0}  ->  caméra en veille (compteur remis à 0)
-
-Option :
-    IA_FENETRE=1 ./venv/bin/python script_ia.py   affiche aussi la fenêtre locale OpenCV
-    IA_PORT=8080                                 change le port du flux
-"""
-
 import json
 import os
 import threading
 import time
+import requests
 
 import cv2
 import mediapipe as mp
 from flask import Flask, Response, jsonify
+
+url_get_start = "http://localhost:8000/api/v1/mouvement"
+url_get_stop = "https://localhost:8000/api/v1/empreinte"
+url_post = "http://localhost:8000/api/v1/personnes"
+
+start = False
 
 HOST = "0.0.0.0"
 PORT = int(os.environ.get("IA_PORT", "8080"))
@@ -54,7 +38,6 @@ app = Flask(__name__)
 
 @app.after_request
 def autoriser_cors(reponse):
-    """Le dashboard tourne sur un autre port (Vite : 5173)."""
     reponse.headers["Access-Control-Allow-Origin"] = "*"
     reponse.headers["Cache-Control"] = "no-store"
     return reponse
@@ -75,7 +58,6 @@ def accueil():
 
 @app.route("/stream.mjpg")
 def flux():
-    """Flux MJPEG : une image JPEG à chaque nouvelle frame."""
     return Response(
         generer_flux(),
         mimetype="multipart/x-mixed-replace; boundary=frame",
@@ -84,7 +66,6 @@ def flux():
 
 @app.route("/nombre_personnes")
 def nombre_personnes():
-    """État renvoyé au panneau CAMÉRA du dashboard."""
     with VERROU:
         return jsonify(
             {
@@ -122,12 +103,23 @@ def serveur_web():
 
 
 def lire_arret():
-    try:
-        with open("arret.json", "r") as fichier:
-            return json.load(fichier)["arret"] == 1
-    except (OSError, ValueError, KeyError):
-        return False
+    response_arret = requests.get(
+        url_get_stop
+    )
+    response_arret.raise_for_status()
+    donnee_arret = response_arret.json()
 
+    if donnee_arret["fingerprint_id"] >= 0:
+        start = False
+
+def lire_depart():
+    response = requests.get(url_get_start)
+    response.raise_for_status()
+    donnee_depart = response.json()
+    if donnee_depart["motion"] :
+        start = True
+    else :
+        start = False
 
 def publier(frame, nombre_personne):
     ok, jpeg = cv2.imencode(
@@ -144,7 +136,6 @@ def publier(frame, nombre_personne):
 
 
 def signaler_erreur(message):
-    """La caméra ne produit aucune image (absente, permission refusée, …)."""
     with VERROU:
         ETAT["erreur"] = message
         ETAT["jpeg"] = None
@@ -153,7 +144,6 @@ def signaler_erreur(message):
 
 
 def veille():
-    """Caméra arrêtée : plus de flux, compteur remis à 0."""
     with VERROU:
         ETAT["jpeg"] = None
         ETAT["nombre_personne"] = 0
@@ -165,8 +155,6 @@ def veille():
 
 
 def main():
-    # Le serveur démarre en premier : le dashboard peut se connecter
-    # même si la caméra met du temps à s'ouvrir (permission macOS).
     threading.Thread(target=serveur_web, daemon=True).start()
     print(f"Flux MJPEG  : http://localhost:{PORT}/stream.mjpg")
     print(f"Compteur    : http://localhost:{PORT}/nombre_personnes")
@@ -180,7 +168,7 @@ def main():
     ) as face_detection:
         try:
             while True:
-                if not lire_arret():
+                if start:
                     if cap is not None:
                         cap.release()
                         cap = None
@@ -233,8 +221,13 @@ def main():
                 if compte_visage == 1:
                     cv2.imwrite("captured_image.jpeg", frame)
 
-                with open("nombre_personnes.json", "w") as fichier:
-                    json.dump({"nombre_personne": compte_visage}, fichier)
+                donnees = {"nombrePersonne": compte_visage}
+
+                envoi = requests.post(
+                    url_post,
+                    json=donnees
+                )
+                envoi.raise_for_status()
 
                 # Diffusion du flux vers le dashboard
                 publier(frame, compte_visage)
@@ -243,6 +236,8 @@ def main():
                     cv2.imshow("cam", frame)
                     if cv2.waitKey(1) & 0xFF == ord("q"):
                         break
+                lire_depart()
+                lire_arret()
         finally:
             if cap is not None:
                 cap.release()
