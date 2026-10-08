@@ -1,0 +1,25 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    libgl1 \
+    libglib2.0-0 \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY initialisation_librairies.txt .
+
+RUN pip install --no-cache-dir \
+    opencv-python==4.10.0.84 \
+    mediapipe==0.10.21 \
+    mss==10.2.0 \
+    requests \
+    flask
+
+COPY script_ia.py .
+COPY arret.json .
+
+EXPOSE 8080
+
+CMD ["python", "script_ia.py"]

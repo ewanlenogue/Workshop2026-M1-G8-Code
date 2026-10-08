@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: workshop
+
+spec:
+  selector:
+    matchLabels:
+      app: node-exporter
+
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+
+    spec:
+      hostNetwork: true
+      hostPID: true
+
+      containers:
+        - name: node-exporter
+          image: prom/node-exporter:latest
+
+          args:
+            - "--path.rootfs=/host"
+            - "--path.procfs=/host/proc"
+            - "--path.sysfs=/host/sys"
+
+          ports:
+            - containerPort: 9100
+              hostPort: 9100
+
+          volumeMounts:
+            - name: rootfs
+              mountPath: /host
+              readOnly: true
+              mountPropagation: HostToContainer
+
+            - name: proc
+              mountPath: /host/proc
+              readOnly: true
+
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+
+      volumes:
+        - name: rootfs
+          hostPath:
+            path: /
+            type: Directory
+
+        - name: proc
+          hostPath:
+            path: /proc
+            type: Directory
+
+        - name: sys
+          hostPath:
+            path: /sys
+            type: Directory
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-exporter
+  namespace: workshop
+
+spec:
+  selector:
+    app: node-exporter
+
+  ports:
+    - protocol: TCP
+      port: 9100
+      targetPort: 9100
+
+  type: ClusterIP

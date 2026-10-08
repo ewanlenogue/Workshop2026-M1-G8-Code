@@ -1,0 +1,337 @@
+openapi: 3.0.3
+info:
+  title: Sentinel-X Backend API
+  version: 1.0.0
+  description: API de collecte des donnees de la tourelle et interface pour l'IA.
+servers:
+  - url: http://localhost:3000
+    description: Serveur local
+tags:
+  - name: Telemetrie
+  - name: Mouvement
+  - name: Empreinte
+  - name: IA
+paths:
+  /api/v1/telemetrie:
+    post:
+      tags: [Telemetrie]
+      summary: Enregistrer une mesure de telemetrie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelemetryRequest'
+            example:
+              device_id: tourelle-esp8266
+              temperature: 23.5
+              humidity: 52.0
+              air_raw: 310
+              air_level: Normal
+              rssi: -68
+              uptime_s: 345
+      responses:
+        '201':
+          description: Telemetrie enregistree
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags: [Telemetrie]
+      summary: Recuperer la telemetrie
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Liste des mesures de telemetrie
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Telemetry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/mouvement:
+    post:
+      tags: [Mouvement]
+      summary: Enregistrer un mouvement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovementRequest'
+            example:
+              device_id: tourelle-esp8266
+              motion: true
+              timestamp: 1775560800
+      responses:
+        '201':
+          description: Mouvement enregistre
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags: [Mouvement, IA]
+      summary: Recuperer les mouvements
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Liste des mouvements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Movement'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/empreinte:
+    post:
+      tags: [Empreinte]
+      summary: Enregistrer une lecture d'empreinte
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FingerprintRequest'
+            examples:
+              known:
+                value:
+                  device_id: tourelle-esp8266
+                  fingerprint_id: 1
+              unknown:
+                value:
+                  device_id: tourelle-esp8266
+                  fingerprint_id: null
+      responses:
+        '201':
+          description: Lecture enregistree
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FingerprintResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags: [Empreinte]
+      summary: Recuperer les lectures d'empreintes
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Liste des lectures d'empreintes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FingerprintEvent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/personnes:
+    post:
+      tags: [IA]
+      summary: Retourner le nombre de personnes detectees
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonCountRequest'
+            example:
+              nombrePersonne: 2
+      responses:
+        '200':
+          description: Nombre de personnes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonCountRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+components:
+  parameters:
+    DeviceId:
+      name: device_id
+      in: query
+      schema:
+        type: string
+      description: Identifiant de l'appareil
+    From:
+      name: from
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+      description: Timestamp Unix minimal
+    To:
+      name: to
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+      description: Timestamp Unix maximal
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 100
+      description: Nombre maximal de resultats
+  schemas:
+    TelemetryRequest:
+      type: object
+      required: [device_id, temperature, humidity, air_raw, air_level, rssi, uptime_s]
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+        temperature:
+          type: number
+        humidity:
+          type: number
+        air_raw:
+          type: integer
+          minimum: 0
+        air_level:
+          type: string
+          minLength: 1
+        rssi:
+          type: integer
+        uptime_s:
+          type: integer
+          minimum: 0
+    Telemetry:
+      allOf:
+        - $ref: '#/components/schemas/TelemetryRequest'
+        - type: object
+          required: [id, received_at]
+          properties:
+            id:
+              type: integer
+            received_at:
+              type: string
+              format: date-time
+    MovementRequest:
+      type: object
+      required: [device_id, motion, timestamp]
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+        motion:
+          type: boolean
+        timestamp:
+          type: integer
+          minimum: 0
+    Movement:
+      allOf:
+        - $ref: '#/components/schemas/MovementRequest'
+        - type: object
+          required: [id, received_at]
+          properties:
+            id:
+              type: integer
+            received_at:
+              type: string
+              format: date-time
+    FingerprintRequest:
+      type: object
+      required: [device_id, fingerprint_id]
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+        fingerprint_id:
+          type: integer
+          nullable: true
+          minimum: 1
+          description: Null ou chaine vide si aucune empreinte n'est reconnue.
+    FingerprintResponse:
+      type: object
+      required: [message, id, intrus]
+      properties:
+        message:
+          type: string
+        id:
+          type: integer
+        intrus:
+          type: boolean
+    FingerprintEvent:
+      type: object
+      required: [id, device_id, fingerprint_id, received_at, intrus]
+      properties:
+        id:
+          type: integer
+        device_id:
+          type: string
+        fingerprint_id:
+          type: integer
+          nullable: true
+        received_at:
+          type: string
+          format: date-time
+        intrus:
+          type: boolean
+    PersonCountRequest:
+      type: object
+      required: [nombrePersonne]
+      properties:
+        nombrePersonne:
+          type: integer
+          minimum: 0
+    CreatedResponse:
+      type: object
+      required: [message, id]
+      properties:
+        message:
+          type: string
+        id:
+          type: integer
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+  responses:
+    BadRequest:
+      description: Requete invalide
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServerError:
+      description: Erreur serveur
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

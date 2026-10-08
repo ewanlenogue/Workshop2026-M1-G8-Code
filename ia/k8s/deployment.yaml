@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ia
+  namespace: workshop
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: ia
+
+  template:
+    metadata:
+      labels:
+        app: ia
+
+    spec:
+      containers:
+        - name: ia
+          image: workshop-ia:1.0
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: IA_PORT
+              value: "8080"
+
+            - name: IA_URL_MOUVEMENT
+              value: "http://backend:3000/api/v1/mouvement"
+
+            - name: IA_URL_EMPREINTE
+              value: "http://backend:3000/api/v1/empreinte"
+
+            - name: IA_URL_PERSONNES
+              value: "http://backend:3000/api/v1/personnes"
+
+            - name: IA_CAMERA_URL
+              value: "http://10.0.3.157:8081/stream.mjpg"

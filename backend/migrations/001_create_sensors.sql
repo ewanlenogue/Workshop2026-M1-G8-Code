@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS sensors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    device VARCHAR(50) NOT NULL,
+    temp DECIMAL(5,2),
+    hum DECIMAL(5,2),
+    gaz INT,
+    pir TINYINT(1),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

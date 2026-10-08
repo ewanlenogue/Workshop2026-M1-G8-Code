@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: workshop
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: frontend
+
+  template:
+    metadata:
+      labels:
+        app: frontend
+
+    spec:
+      containers:
+        - name: frontend
+          image: workshop-frontend:1.0
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 80
+
+          env:
+            - name: VITE_API_URL
+              value: "http://backend:3000/api"
+
+            - name: VITE_CAMERA_URL
+              value: "http://ia:8080"
+
+            - name: VITE_COMMANDS_API_URL
+              value: "http://backend:3000/api/v1/commandes"

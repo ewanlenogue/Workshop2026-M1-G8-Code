@@ -1,0 +1,4 @@
+python -m pip uninstall opencv-python opencv-contrib-python opencv-python-headless opencv-contrib-python-headless mediapipe mss -y
+python -m pip install opencv-python==4.10.0.84
+python -m pip install mediapipe==0.10.21
+python -m pip install mss==10.2.0

@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS fingerprint_registry (
+    fingerprint_id INT UNSIGNED PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
