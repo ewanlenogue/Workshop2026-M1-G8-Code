@@ -1,76 +1,74 @@
-function LogModal({ selectedLog, setSelectedLog }) {
+function LogModal({ selectedEvent, setSelectedEvent }) {
   return (
-    selectedLog && (
-      <div className="modal-overlay" onClick={() => setSelectedLog(null)}>
+    selectedEvent && (
+      <div className="modal-overlay" onClick={() => setSelectedEvent(null)}>
         <div className="log-modal" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
             <div>
-              <h2>Détails de l'événement</h2>
+              <h2>{selectedEvent.title}</h2>
               <span>
-                {selectedLog.date} {selectedLog.time}
+                {selectedEvent.date} · {selectedEvent.device_id}
               </span>
             </div>
 
             <button
               className="modal-close"
-              onClick={() => setSelectedLog(null)}
+              onClick={() => setSelectedEvent(null)}
+              aria-label="Fermer"
             >
               ×
             </button>
           </div>
 
           <div className="event-banner">
-            <div className={`event-icon ${selectedLog.type.toLowerCase()}`}>
-              {selectedLog.type === "ERROR" ? "!" : "✓"}
+            <div className={`event-icon ${selectedEvent.type.toLowerCase()}`}>
+              {selectedEvent.type === "ERROR" ? "!" : "✓"}
             </div>
 
             <div>
-              <h3>{selectedLog.message}</h3>
-              <span>{selectedLog.source}</span>
+              <h3>{selectedEvent.message}</h3>
+              <span>{selectedEvent.source}</span>
             </div>
 
-            <strong>{selectedLog.type}</strong>
+            <strong>{selectedEvent.type}</strong>
           </div>
 
           <div className="event-info">
             <div>
-              <label>Adresse IP</label>
-              <strong>{selectedLog.ip}</strong>
+              <label>Appareil</label>
+              <strong>{selectedEvent.device_id}</strong>
             </div>
 
             <div>
               <label>Date & heure</label>
-              <strong>
-                {selectedLog.date} {selectedLog.time}
-              </strong>
+              <strong>{selectedEvent.date}</strong>
             </div>
 
             <div>
-              <label>Endpoint</label>
-              <strong>{selectedLog.endpoint}</strong>
+              <label>Source API</label>
+              <strong>{selectedEvent.endpoint}</strong>
             </div>
 
             <div>
-              <label>Méthode</label>
-              <strong>{selectedLog.method}</strong>
+              <label>Enregistrement</label>
+              <strong>{selectedEvent.reference}</strong>
             </div>
           </div>
 
           <div className="analysis">
-            <h3>Analyse</h3>
-
-            <p>{selectedLog.description}</p>
+            <h3>Détails</h3>
+            <p>{selectedEvent.details}</p>
           </div>
 
-          {selectedLog.type === "ERROR" && (
+          {selectedEvent.type === "ERROR" && (
             <div className="action-warning">
               <span>⚠</span>
 
               <div>
                 <strong>Action recommandée</strong>
                 <p>
-                  Vérifier l'adresse IP et analyser les tentatives de
-                  connexion.
+                  Vérifier le flux caméra et contrôler l'accès au site
+                  {" "}({selectedEvent.source}, {selectedEvent.device_id}).
                 </p>
               </div>
             </div>

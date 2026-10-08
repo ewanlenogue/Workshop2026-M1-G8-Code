@@ -1,133 +1,137 @@
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "../styles/dashboard.css";
+import { getDashboardData, sendCommand } from "../services/api.js";
+import { buildJournal, buildStats, buildSerie, formatUptime } from "../services/events.js";
 import SensorPanel from "./dashboard/SensorPanel.jsx";
 import CameraPanel from "./dashboard/CameraPanel.jsx";
-import AttackTypes from "./dashboard/AttackTypes.jsx";
+import EventTypes from "./dashboard/EventTypes.jsx";
 import Journal from "./dashboard/Journal.jsx";
 import Buzzer from "./dashboard/Buzzer.jsx";
 import LogModal from "./dashboard/LogModal.jsx";
 
-function Dashboard() {
-  // const [users, setMessage] = useState([]);
+const REFRESH_MS = 15000;
 
-  // useEffect(() => {
-  //   fetch("http://localhost:3000/api/users")
-  //     .then((res) => res.json())
-  //     .then((data) => setMessage(data)) // Assuming you want to display all users
-  //     .catch((error) => console.error(error));
-  // }, []);
-  const data = [
-    { day: "Lun", score: 20 },
-    { day: "Mar", score: 35 },
-    { day: "Mer", score: 28 },
-    { day: "Jeu", score: 65 },
-    { day: "Ven", score: 82 },
-    { day: "Sam", score: 70 },
-    { day: "Dim", score: 45 },
-  ];
+function Dashboard() {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [updatedAt, setUpdatedAt] = useState(null);
   const [active, setActive] = useState(null);
   const [alert, setAlert] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [command, setCommand] = useState(null);
 
-  const attackTypes = [
-    {
-      name: "Brute Force",
-      percentage: 47.4,
-      color: "#ff3b4b",
-    },
-    {
-      name: "SQL Injection",
-      percentage: 21.1,
-      color: "#ffc107",
-    },
-    {
-      name: "XSS",
-      percentage: 13.2,
-      color: "#1683ff",
-    },
-    {
-      name: "Scan de ports",
-      percentage: 10.5,
-      color: "#8b4de8",
-    },
-    {
-      name: "Autres",
-      percentage: 7.9,
-      color: "#8ba9c5",
-    },
-  ];
-  const logs = [
-    {
-      id: 1,
-      type: "INFO",
-      message: "Niveau détecté : 21°C",
-      time: "14:28:12",
-      date: "08/04/2026",
-      source: "Backend API",
-      ip: "192.168.1.45",
-      endpoint: "/api/server",
-      method: "GET",
-      description: "Le serveur backend est correctement connecté.",
-    },
-    {
-      id: 2,
-      type: "SUCCESS",
-      message: "Données récupérées",
-      time: "14:28:15",
-      date: "08/04/2026",
-      source: "Sensor API",
-      ip: "192.168.1.20",
-      endpoint: "/api/sensors",
-      method: "GET",
-      description: "Les données des capteurs ont été récupérées avec succès.",
-    },
-    {
-      id: 3,
-      type: "ERROR",
-      message: "Connexion échouée",
-      time: "14:29:03",
-      date: "08/04/2026",
-      source: "Authentication",
-      ip: "192.168.1.145",
-      endpoint: "/login",
-      method: "POST",
-      description:
-        "Plusieurs tentatives de connexion ont échoué depuis cette adresse IP.",
-    },
-    {
-      id: 4,
-      type: "ERROR",
-      message: "Connexion échouée",
-      time: "14:29:03",
-      date: "08/04/2026",
-      source: "Authentication",
-      ip: "192.168.1.145",
-      endpoint: "/login",
-      method: "POST",
-      description:
-        "Plusieurs tentatives de connexion ont échoué depuis cette adresse IP.",
-    },
-  ];
-  const [selectedLog, setSelectedLog] = useState(null);
+  const load = useCallback(async () => {
+    try {
+      const payload = await getDashboardData();
+      setData(payload);
+      setError(null);
+      setUpdatedAt(new Date());
+    } catch (loadError) {
+      setError(loadError.message);
+    }
+  }, []);
+
+  useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- premier chargement asynchrone
+    load();
+    const timer = setInterval(load, REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [load]);
+
+  const telemetry = data?.telemetry ?? [];
+  const movements = data?.movements ?? [];
+
+  const latest = telemetry[0] ?? null;
+  const lastMovement = movements[0] ?? null;
+  const zoneAlert = lastMovement ? Number(lastMovement.motion) === 1 : false;
+
+  const journal = useMemo(() => buildJournal(data ?? {}), [data]);
+  const stats = useMemo(() => buildStats(data ?? {}), [data]);
+  const serie = useMemo(() => buildSerie(data?.telemetry ?? []), [data]);
+
+  const runCommand = useCallback(async (action) => {
+    setCommand({ action, pending: true });
+
+    try {
+      await sendCommand(action);
+      setCommand({ action, pending: false, ok: true });
+    } catch (commandError) {
+      setCommand({ action, pending: false, ok: false, message: commandError.message });
+    }
+  }, []);
+
+  const toggleBuzzer = () => {
+    setAlert((current) => {
+      runCommand(current ? "buzzer_off" : "buzzer_on");
+      return !current;
+    });
+  };
+
+  const openDoor = () => runCommand("open_door");
+
+  const device = latest?.device_id ?? "appareil inconnu";
 
   return (
     <div className="dashboard">
-      <div className="dashboard-header">
-        <h1>SENTINEL X</h1>
-        <p>Centre de commandement</p>
-      </div>
+      <header className="dashboard-header">
+        <div className="dashboard-title">
+          <h1>SENTINEL X</h1>
+          <p>Centre de contrôle</p>
+        </div>
+
+        <div className={`dashboard-status ${error ? "offline" : "online"}`}>
+          <span className="status-dot" />
+          <span>
+            {error
+              ? "Backend injoignable"
+              : `${device} · uptime ${latest ? formatUptime(latest.uptime_s) : "—"} · MAJ ${
+                  updatedAt
+                    ? updatedAt.toLocaleTimeString("fr-FR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                      })
+                    : "—"
+                }`}
+          </span>
+        </div>
+      </header>
+
+      {error && (
+        <div className="api-banner error">
+          <span>⚠</span>
+          <p>{error}</p>
+          <button type="button" onClick={load}>
+            Réessayer
+          </button>
+        </div>
+      )}
+
+      {!error && stats.total === 0 && data && (
+        <div className="api-banner info">
+          <span>ℹ</span>
+          <p>Backend connecté mais aucune donnée en base (voir « npm run seed »).</p>
+        </div>
+      )}
 
       <div className="section1">
-        <SensorPanel active={active} setActive={setActive} data={data} />
+        <SensorPanel active={active} setActive={setActive} latest={latest} serie={serie} />
         <CameraPanel active={active} setActive={setActive} />
       </div>
 
       <div className="section2">
-        <AttackTypes attackTypes={attackTypes} />
-        <Journal logs={logs} setSelectedLog={setSelectedLog} />
-        <Buzzer alert={alert} setAlert={setAlert} />
+        <EventTypes stats={stats} />
+        <Journal events={journal} setSelectedEvent={setSelectedEvent} />
+        <Buzzer
+          alert={alert}
+          zoneAlert={zoneAlert}
+          onToggle={toggleBuzzer}
+          onOpenDoor={openDoor}
+          command={command}
+        />
       </div>
 
-      <LogModal selectedLog={selectedLog} setSelectedLog={setSelectedLog} />
+      <LogModal selectedEvent={selectedEvent} setSelectedEvent={setSelectedEvent} />
     </div>
   );
 }

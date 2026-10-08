@@ -63,6 +63,17 @@ body {
   box-sizing: border-box;
 }
 
+/*
+  Empêche un enfant large de forcer une barre de défilement
+  horizontale et fait remplir la page : sans "flex: 1",
+  le dashboard se arrête à sa largeur de contenu (~900px)
+  et laisse un vide à droite sur grand écran.
+*/
+#root > * {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 p,h1,h2,h3,h4,h5,h6,ul,ol,li {
   margin: 0;
 }
