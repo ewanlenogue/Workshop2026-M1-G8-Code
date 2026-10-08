@@ -271,6 +271,9 @@
     min-height: 0;
     aspect-ratio: 16 / 9;
 
+    /* socle des surcouches (états, pastille de comptage) */
+    position: relative;
+
     background: #050d1a;
     border: 1px solid #1e3a5f;
     border-radius: 8px;
@@ -311,6 +314,95 @@
     background: #0a1728;
     color: #38bdf8;
     font-size: 12px;
+}
+
+/* =========================================================
+   ÉTATS DU FLUX CAMÉRA
+   ========================================================= */
+
+.camera-state {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 100%;
+    padding: 16px;
+    background: #050d1a;
+    color: #9fb3d1;
+    font-family: monospace;
+    font-size: 13px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.camera-state.error {
+    color: #fca5a5;
+}
+
+.camera-state span {
+    font-size: 30px;
+}
+
+.camera-state p {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.camera-state code {
+    padding: 4px 8px;
+    border: 1px solid #1e3a5f;
+    border-radius: 6px;
+    background: #0a1728;
+    color: #38bdf8;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
+/* Pastille d'état : direct / veille / compteur indisponible */
+.camera-badge {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: calc(100% - 20px);
+    padding: 6px 12px;
+    border: 1px solid #1e3a5f;
+    border-radius: 999px;
+    background: rgba(5, 13, 26, 0.88);
+    color: #d6e4f0;
+    font-family: monospace;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.camera-badge .camera-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+    animation: camera-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes camera-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
 }
 
 /* =========================================================
